@@ -9,6 +9,136 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserStatus {
+  VALIDATING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+  GUEST
+}
+
+model UserAccess {
+  user_id String @id
+
+  email                String    @unique
+  email_confirmed_at   DateTime?
+  student_confirmed_at DateTime?
+
+  status UserStatus @default(VALIDATING)
+  role   UserRole   @default(USER)
+
+  member Members?
+}
+
+model Members {
+  member_id   Int        @id @default(autoincrement())
+  user_id     String     @unique
+  user_access UserAccess @relation(fields: [user_id], references: [user_id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  familyName      String
+  givenName       String
+  middleName      String?
+  familyNamePho   String
+  givenNamePho    String
+  middleNamePho   String?
+  familyNameKanji String?
+  givenNameKanji  String?
+  middleNameKanji String?
+
+  birthOfDate DateTime
+  nationality String
+  phoneNumber String?
+
+  newsLetter Boolean @default(false)
+
+  student         Students?
+  profile         Profiles?
+  supports        Supports[]
+  emails_sent     Emails[]   @relation("emailsSent")
+  emails_recieved Emails[]   @relation("emailsReceived")
+}
+
+model Universities {
+  university_id Int        @id @default(autoincrement())
+  name          String
+  students      Students[]
+}
+
+model Students {
+  student_id    Int          @id @default(autoincrement())
+  created_at    DateTime     @default(now())
+  university_id Int
+  university    Universities @relation(fields: [university_id], references: [university_id])
+
+  student_no    String   @unique
+  student_email String   @unique
+  force         Boolean  @default(false)
+  date_of_entry DateTime @default(now())
+
+  code        String  @default("000000")
+  validated   Boolean @default(false)
+  trial_send  Int     @default(0)
+  trial_count Int     @default(0)
+
+  member_id Int     @unique
+  member    Members @relation(fields: [member_id], references: [member_id])
+}
+
+model Profiles {
+  member_id Int     @id
+  member    Members @relation(fields: [member_id], references: [member_id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime?
+
+  username     String  @unique
+  display_name String?
+  description  String?
+  social_media Json
+  avatar_url   String  @default("default/default_male01.jpg")
+}
+
+model Supports {
+  support_id Int @id @default(autoincrement())
+
+  sender_id Int?
+  member    Members? @relation(fields: [sender_id], references: [member_id])
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  sender_email String
+  subject      String
+  content      String
+}
+
+model Emails {
+  email_id    Int       @id @default(autoincrement())
+  original_id Int?
+  created_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  sender_id     Int
+  sender_member Members @relation("emailsSent", fields: [sender_id], references: [member_id])
+
+  receiver_id     Int?
+  receiver_member Members? @relation("emailsReceived", fields: [receiver_id], references: [member_id])
+
+  reciever_email String
+  subject        String
+  content        String
 }

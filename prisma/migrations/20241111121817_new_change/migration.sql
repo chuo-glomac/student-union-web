@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Students" ALTER COLUMN "code" SET DEFAULT '000000';

@@ -21,8 +21,18 @@ export const sendGmail = async (
     return;
   }
 
+  // const transporter = nodemailer.createTransport({
+  //   service: "Gmail",
+  //   auth: {
+  //     user: mail,
+  //     pass: pass,
+  //   },
+  // });
+
   const transporter = nodemailer.createTransport({
-    service: "Gmail",
+    host: "smtp.hostinger.com",
+    port: 465,
+    secure: true,
     auth: {
       user: mail,
       pass: pass,
@@ -51,8 +61,8 @@ export const sendGmail = async (
     }
 
     const info = await transporter.sendMail(message);
+    console.log("Message sent:", info);
 
-    // console.log("Message sent: %s", info.messageId);
   } catch (error) {
     console.error("Failed to send email: ", error);
   }
@@ -69,23 +79,31 @@ export const sendGmailWithId = async (
   html?: string
 ) => {
   let emails: string[] = [];
-  const member = await prisma.member.findUnique({
+  const member = await prisma.members.findUnique({
     where: {
-      id: id
+      member_id: id
+    },
+    include: {
+      user_access: {
+        select: {
+          email: true,
+        },
+      },
     }
   });
-  if (member && member.email) {
-    emails.push(member.email);
+  if (member && member.user_access.email) {
+    emails.push(member.user_access.email);
   } else {
     return;
   }
 
-  const emailData = await prisma.email.create({
+  const emailData = await prisma.emails.create({
     data: {
-      senderId: senderId,
-      recieverId: member.id,
+      sender_id: senderId,
+      receiver_id: member.member_id,
+      reciever_email: member.user_access.email,
       subject: subject,
-      body: text,
+      content: text,
     }
   })
 
@@ -97,12 +115,12 @@ You have a message from GSU Council.
 GSU運営委員よりメッセージが届いています。
 
 ーーーーーーーーーーーーーーーーーーーーー
-To: ${name} (ID: ${emailData.recieverId})
+To: ${name} (ID: ${emailData.receiver_id})
 Subject: ${subject}
 
 ${text}
 ーーーーーーーーーーーーーーーーーーーーー
-email-id: ${emailData.id.toString().padStart(6, "0")}
+email-id: ${emailData.email_id.toString().padStart(6, "0")}
 
 ※本メールは送信専用のため、ご返信いただけません。
 ※宛先が異なるなど、ご不明な点はヘルプデスクまでご連絡ください。
@@ -168,17 +186,17 @@ export async function supportForm(formData: FormData) {
   const subject = formData.get("subject") as string;
   const body = formData.get("body") as string;
 
-  const supportData = await prisma.support.create({
+  const supportData = await prisma.supports.create({
     data: {
-      email,
+      sender_email: email,
       subject,
       content: body,
     },
   });
-  const contactId = supportData.id;
+  const supportId = supportData.support_id;
 
   const messageContent = `
-**【ヘルプデスク】** contactId: ${contactId}
+**【ヘルプデスク】** contactId: ${supportId}
 新しいフォームが送信されました。
 
 件名：${subject}
@@ -197,11 +215,11 @@ Thank you for submitting the Support Form.
 [Content]
 Subject: ${subject}
 Body: ${body}
-Contact Id: ${contactId.toString().padStart(6, "0")}
+Contact Id: ${supportId.toString().padStart(6, "0")}
   `;
 
   await sendGmail(
-    "GLOMAC Student Union [Support Form]",
+    "Student Union [Support Form]",
     [email],
     "Thank you for submitting the Support Form",
     message
@@ -215,9 +233,9 @@ Contact Id: ${contactId.toString().padStart(6, "0")}
 import crypto from "crypto";
 export async function sendCode(formData: FormData) {
   try {
-    const studentId = formData.get("student-id") as string;
-    const chuoEmail = formData.get("chuo-email") as string;
-    if (studentId.substring(0, 2) != chuoEmail.substring(1, 3)) {
+    const studentNo = formData.get("student-no") as string;
+    const studentEmail = formData.get("student-email") as string;
+    if (studentNo.substring(0, 2) != studentEmail.substring(1, 3)) {
       alert("Please check Student ID and Chuo Email.");
       return;
     }
@@ -229,25 +247,21 @@ export async function sendCode(formData: FormData) {
     }
 
     const code = crypto.randomInt(0, 1000000).toString().padStart(6, "0");
-    // const confirmationCode = code.substring(0, 3) + "-" + code.substring(3, 6);
 
-    // const country = formData.get("country") as string;
-    let subject = "[GSU Protal] Registration Confirmation";
+    let subject = "【Student Union】在籍確認のご連絡";
     let message = `
 Hi,
 
-Thank you for registering for GLOMAC Student Union.
-Please use the following code to confirm your identity.
+大学メールアドレスを使った在籍確認をお願いします。
+以下のコードを確認画面に入力してください。
 
-Confirmation Code：${code}
-Valid for 30 minutes.
+認証コード：${code}
+有効期限：30分
 
-※This is a send-only address, you cannot reply.
-※If this was not for you please contact us.
 ※宛先が異なるなど、ご不明な点はヘルプデスクまでご連絡ください。
 
 ━━━━━━━━━━━━━━━━
-Send by GLOMAC Student Union Committee
+Send by Student Union Committee
 [Help Desk]
 ${getUrl()}support
 
@@ -255,55 +269,47 @@ ${getUrl()}support
 Copyright(C) All rights reserved.
       `;
 
-    const matchingValidations = await prisma.validation.findMany({
+    const matchingValidations = await prisma.students.findMany({
       where: {
-        OR: [{ studentId }, { chuoEmail }],
+        OR: [{ student_no: studentNo }, { student_email: studentEmail }],
       },
       include: {
-        member: true, // Include the related member data
+        member: true,
       },
     });
 
-    let retry = 0;
     if (matchingValidations.length > 0) {
       // console.log('Matching validation records:', matchingValidations);
       const recordsForced = matchingValidations.filter(
-        (validation) => validation.type == 1
+        (student) => student.force === true
       );
       const recordsWithoutMember = matchingValidations.filter(
-        (validation) => validation.member === null
+        (student) => student.member === null
       );
 
       if (recordsForced.length > 0) {
         console.log(
           `Cannot override validation. Force validation data is included.`
         );
-        throw new Error(
-          "This student ID and chuo email is not allow on this page. \nこの学籍番号または全学メールはこのページでは使用できません。"
-        );
+        // throw new Error(
+        //   "This student ID and chuo email is not allow on this page. \nこの学籍番号または全学メールはこのページでは使用できません。"
+        // );
+        return { ok: true, force: true };
       }
 
       if (recordsWithoutMember.length > 0) {
         console.log("Override validation:", recordsWithoutMember);
 
-        await prisma.validation.deleteMany({
+        await prisma.students.update({
           where: {
-            AND: [
-              {
-                OR: [{ studentId }, { chuoEmail }],
-              },
-              {
-                type: 0,
-              },
-              {
-                member: {
-                  is: null,
-                },
-              },
-            ],
+            student_email: studentEmail
+          },
+          data: {
+            code,
+            trial_count: { increment: 1 },
+            trial_send: 0
           },
         });
-        retry = matchingValidations[0].count + 1;
       } else {
         console.log(
           `Cannot override validation. Member is linked to ${matchingValidations.length} data.`
@@ -312,27 +318,37 @@ Copyright(C) All rights reserved.
           "Either or both Student ID and Chuo Email is used. \nこの学籍番号または全学メールは使用されています。"
         );
       }
+    } else {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.getUser();
+
+      const member = await prisma.members.findUnique({
+        where: { user_id: data.user?.id }
+      })
+
+      if (member) {
+        await prisma.students.create({
+          data: {
+            member_id: member?.member_id,
+            student_no: studentNo,
+            student_email: studentEmail,
+            code,
+          },
+        });
+      } else {
+        throw new Error("Cannot find member data.")
+      }
     }
 
-    // add user info to database (unverified)
-    await prisma.validation.create({
-      data: {
-        studentId,
-        chuoEmail,
-        code,
-        count: retry,
-      },
-    });
-
     // send code to user
-    await sendGmail("GLOMAC Student Union", [chuoEmail], subject, message);
+    await sendGmail("Student Union", [studentEmail], subject, message);
     // console.log("confirmation code:", code);
     // console.log(formData);
 
     // const email = formData.get("email") as string;
     // await signup(email, password);
 
-    return "form submitted";
+    return { ok: true, force: false };
   } catch (err) {
     console.log(err);
     throw new Error((err as string) || "");
@@ -341,33 +357,42 @@ Copyright(C) All rights reserved.
 
 export async function verifyCode(chuoEmail: string, code: string) {
   try {
-    const validation = await prisma.validation.findUnique({
-      where: { chuoEmail },
+    const student = await prisma.students.findUnique({
+      where: { student_email: chuoEmail },
     });
 
     const now = new Date().toISOString();
-    if (!validation) {
+    if (!student) {
       return { ok: false, message: "Cannot find validation." }
       // return false;
     }
-    const createdAt = new Date(validation.createdAt).toISOString();
+    const createdAt = new Date(student.created_at).toISOString();
     const diffInMinutes = (new Date(now).getTime() - new Date(createdAt).getTime()) / (1000 * 60);
-    if (diffInMinutes > 45 && validation.type != 1) {
+    if (diffInMinutes > 45 && student.force === false) {
       console.log("Code has expired.")
       return { ok: false, message: "Code has expired." }
     }
 
-    if (validation?.code === code) {
-      await prisma.validation.update({
-        where: { chuoEmail },
+    if (student?.trial_send > 3) {
+      return { ok: false, message: "Validation over limit. (3 times)" }
+    }
+
+    if (student?.code === code) {
+      await prisma.students.update({
+        where: { student_email: chuoEmail },
         data: {
-          validateAt: new Date(),
-          valid: true,
+          validated: true,
         },
       });
       return { ok: true, message: "Validation success." }
       // return true;
     } else {
+      await prisma.students.update({
+        where: { student_email: chuoEmail },
+        data: {
+          trial_send: { increment: 1 },
+        },
+      });
       return { ok: false, message: "Code doesn't match." }
       // return false;
     }
@@ -383,25 +408,28 @@ import { validateUserServer } from "./supabase/auth";
 import { redirect } from "next/navigation";
 export async function saveFinalForm(formData: FormData) {
   try {
-    const studentId = formData.get("student-id") as string;
-    const chuoEmail = formData.get("chuo-email") as string;
+    const studentNo = formData.get("student-no") as string;
+    const studentEmail = formData.get("student-email") as string;
 
-    const validation = await prisma.validation.findUnique({
-      where: { studentId, chuoEmail },
+    const student = await prisma.students.findUnique({
+      where: { student_no: studentNo, student_email: studentEmail },
     });
 
-    if (!validation || !validation.valid) {
-      throw new Error("Validation not completed or invalid.");
+    if (!student || !student.validated) {
+      return { ok: false, message: "Validation not completed or invalid." }
+      // throw new Error("Validation not completed or invalid.");
     }
 
     const password = formData.get("password") as string;
     const passwordConf = formData.get("password-confirm") as string;
     if (password != passwordConf) {
-      throw new Error("The password does not match.");
+      return { ok: false, message: "The password does not match." }
+      // throw new Error("The password does not match.");
     }
     const pattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     if (!pattern.test(password)) {
-      throw new Error("The password misses character.");
+      return { ok: false, message: "The password misses character." }
+      // throw new Error("The password misses character.");
     }
 
     const email = (formData.get("email") as string).toLowerCase();
@@ -410,17 +438,18 @@ export async function saveFinalForm(formData: FormData) {
       password,
     };
 
-    const { data, error } = await supabase.auth.signUp(userData);
-    if (error) {
-      console.log(error);
-      throw new Error("Cannot SignUp");
-    }
+    // const { data, error } = await supabase.auth.signUp(userData);
+    // if (error || !data || !data.user) {
+    //   console.log(error);
+    //   return { ok: false, message: "Unknown error signing up." }
+    //   // throw new Error("Cannot SignUp");
+    // }
 
     const country = formData.get("country") as string;
     const { inviteLink, code } = await createInvite();
 
-    const uuid = data.user?.id || "0";
-    const year = 2000 + Number(studentId.substring(0, 2)) || 2000;
+    // const uuid = data.user.id;
+    const year = 2000 + Number(studentNo.substring(0, 2)) || 2000;
 
     const familyName = formData.get("familyName") as string;
     const givenName = formData.get("givenName") as string;
@@ -441,7 +470,6 @@ export async function saveFinalForm(formData: FormData) {
       birthOfDate: new Date(formData.get("birthOfDate") as string),
       nationality: country,
       phoneNumber: formData.get("phone") as string,
-      studentId,
       discordCode: code,
       status: 2,
       newsLetter: formData.get("newsLetter") as string == "on" || false,

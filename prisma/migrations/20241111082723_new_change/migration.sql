@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "UserAccess" ALTER COLUMN "status" SET DEFAULT 'VALIDATING';
