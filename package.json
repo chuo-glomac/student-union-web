@@ -12,7 +12,9 @@
     "@prisma/client": "^5.22.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
+    "@types/nodemailer": "^6.4.17",
     "next": "15.0.3",
+    "nodemailer": "^6.9.16",
     "prisma": "^5.22.0",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106"
