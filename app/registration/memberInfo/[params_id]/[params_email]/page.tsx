@@ -227,7 +227,7 @@ export default function SignUpPage() {
         `;
       }
       alert(alert_complete);
-      
+
     } catch (err) {
       alert(err);
       setIsLoading(false);
@@ -239,8 +239,8 @@ export default function SignUpPage() {
       <div className="group max-w-2xl w-full flex flex-col">
         <div className="text-2xl font-medium mb-8">
           Student Union (Page: {page})
-          <p className="text-lg font-normal">params_id: {params_id}</p>
-          <p className="text-lg font-normal">params_email: {params_email}</p>
+          {/* <p className="text-lg font-normal">params_id: {params_id}</p> */}
+          <p className="text-lg font-normal">Email: {params_email}</p>
         </div>
 
         <form className="group max-w-2xl w-full flex flex-col">

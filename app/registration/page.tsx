@@ -10,7 +10,7 @@ import { supabase } from "@/utils/supabase";
 export default function SignUpPage() {
   const [page, setPage] = useState<number>(1);
   const [email, setEmail] = useState<string>("");
-  const [isCheckedAgreement, setIsCheckedAgreement] = useState<boolean>(true);
+  const [isCheckedAgreement, setIsCheckedAgreement] = useState<boolean>(false);
   const [isCheckedLetter, setIsCheckedLetter] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
