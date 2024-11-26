@@ -152,7 +152,7 @@ export async function createInvite() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      max_age: expireSeconds,
+      max_age: 0,
       max_uses: 1,
       unique: true,
     }),
@@ -162,12 +162,9 @@ export async function createInvite() {
   const data: any = await response.json();
   const { code } = data;
   const inviteLink = `https://discord.gg/${code}`
+  console.log("Discord invite: ", data);
 
   return { inviteLink, code };
-}
-
-export async function setUserRole(invite_code: string, role: string) {
-
 }
 
 // export async function createRoleAndChannel(roleName: string) {

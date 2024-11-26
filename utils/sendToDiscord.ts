@@ -14,7 +14,7 @@ export default async function sendToDiscord(channelId: string, messageContent: s
     );
   
     const data = await response.json();
-    // console.log(data);
+    console.log(data);
   
     return data;
   }

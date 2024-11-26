@@ -1,112 +1,112 @@
-'use server'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+// 'use server'
+// import { revalidatePath } from 'next/cache'
+// import { redirect } from 'next/navigation'
 
-import { createClient } from '@/utils/supabase/server'
-const supabase = createClient()
+// import { createClient } from '@/utils/supabase/server'
+// const supabase = createClient()
 
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+// import { PrismaClient } from "@prisma/client";
+// const prisma = new PrismaClient();
 
-// export async function signup(email: string, password: string) {
-//   const { error } = await supabase.auth.signUp({ email, password })
+// // export async function signup(email: string, password: string) {
+// //   const { error } = await supabase.auth.signUp({ email, password })
+
+// //   if (error) {
+// //     console.log(error)
+// //     throw new Error('エラーが発生しました')
+// //   }
+
+// //   revalidatePath('/', 'layout')
+// //   redirect('/private')
+// // }
+
+// export async function login(email: string, password: string, path?: string) {
+//   const data = {
+//     email,
+//     password,
+//   }
+
+//   const { error } = await supabase.auth.signInWithPassword(data)
 
 //   if (error) {
 //     console.log(error)
 //     throw new Error('エラーが発生しました')
+//     // redirect('/error')
 //   }
 
+//   await validateUser();
 //   revalidatePath('/', 'layout')
-//   redirect('/private')
+//   redirect(`/${path || "home"}`)
 // }
 
-export async function login(email: string, password: string, path?: string) {
-  const data = {
-    email,
-    password,
-  }
+// export async function signout() {
+//   const { error } = await supabase.auth.signOut()
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+//   if (error) {
+//     console.log(error);
+//     throw new Error('エラーが発生しました')
+//   }
 
-  if (error) {
-    console.log(error)
-    throw new Error('エラーが発生しました')
-    // redirect('/error')
-  }
+//   await redirect("/login");
+// }
 
-  await validateUser();
-  revalidatePath('/', 'layout')
-  redirect(`/${path || "home"}`)
-}
+// export async function validateUser() {
+//   const { data, error }: any = await supabase.auth.getUser();
+//   if (error || !data?.user) redirect('/login');
+//   const userData: any = data.user;
 
-export async function signout() {
-  const { error } = await supabase.auth.signOut()
+//   const memberData: any = await prisma.member.findUnique({
+//     where: { uuid: userData.id },
+//   });
+//   if (!memberData) redirect('/login');
+//   // console.log(userData);
+//   // console.log(memberData);
 
-  if (error) {
-    console.log(error);
-    throw new Error('エラーが発生しました')
-  }
+//   console.log('validate user:', memberData)
+// å
+//   delete userData.id;
+//   delete userData.identities;
 
-  await redirect("/login");
-}
+//   delete memberData.id;
+//   delete memberData.uuid;
+//   delete memberData.discordCode;
+//   delete memberData.status;
 
-export async function validateUser() {
-  const { data, error }: any = await supabase.auth.getUser();
-  if (error || !data?.user) redirect('/login');
-  const userData: any = data.user;
+//   return { userData, memberData, error }
+// }
 
-  const memberData: any = await prisma.member.findUnique({
-    where: { uuid: userData.id },
-  });
-  if (!memberData) redirect('/login');
-  // console.log(userData);
-  // console.log(memberData);
+// export async function validateUserServer() {
+//   const { data, error }: any = await supabase.auth.getUser();
+//   if (error || !data?.user) {
+//     return { ok: false, message: 'No user found.' }
+//   }
 
-  console.log('validate user:', memberData)
+//   const userData: any = data.user;
+//   const memberData: any = await prisma.member.findUnique({
+//     where: { uuid: userData.id },
+//   });
+//   if (!memberData) {
+//     return { ok: false, message: 'No member found.' }
+//   }
 
-  delete userData.id;
-  delete userData.identities;
+//   console.log('validate user (server):', memberData)
+//   return { ok: true, userData, memberData }
+// }
 
-  delete memberData.id;
-  delete memberData.uuid;
-  delete memberData.discordCode;
-  delete memberData.status;
+// export async function getValidationInfo(studentId: string, chuoEmail: string) {
+//   const validationInfo: any = await prisma.validation.findUnique({
+//     where: {
+//       studentId,
+//       chuoEmail,
+//     }
+//   });
+//   if (!validationInfo) {
+//     return { ok: false, message: 'Cannot find valid user. Student ID and Chuo Email might not match.' }
+//   }
 
-  return { userData, memberData, error }
-}
+//   if (validationInfo.type == 1) {
+//     return { ok: true, valid: validationInfo.valid, message: 'Valid user data for force signup.' }
+//   }
 
-export async function validateUserServer() {
-  const { data, error }: any = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    return { ok: false, message: 'No user found.' }
-  }
-
-  const userData: any = data.user;
-  const memberData: any = await prisma.member.findUnique({
-    where: { uuid: userData.id },
-  });
-  if (!memberData) {
-    return { ok: false, message: 'No member found.' }
-  }
-
-  console.log('validate user (server):', memberData)
-  return { ok: true, userData, memberData }
-}
-
-export async function getValidationInfo(studentId: string, chuoEmail: string) {
-  const validationInfo: any = await prisma.validation.findUnique({
-    where: {
-      studentId,
-      chuoEmail,
-    }
-  });
-  if (!validationInfo) {
-    return { ok: false, message: 'Cannot find valid user. Student ID and Chuo Email might not match.' }
-  }
-
-  if (validationInfo.type == 1) {
-    return { ok: true, valid: validationInfo.valid, message: 'Valid user data for force signup.' }
-  }
-
-  return { ok: false, message: 'Not Authorized' }
-}
+//   return { ok: false, message: 'Not Authorized' }
+// }
