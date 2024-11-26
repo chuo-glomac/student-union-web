@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { Field, FieldForPrivateEmail } from "@/components/form";
-import { useRouter } from "next/navigation";
 import { getUrl } from "@/utils/getUrl";
 import { SubmitButton } from "@/components/submitButton";
 import { generateRandomId } from "@/utils/generateRandomId";
@@ -26,7 +25,7 @@ export default function SignUpPage() {
     }
 
     // console.log(email, password, getUrl());
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {

@@ -29,7 +29,7 @@ export async function supportForm(formData: FormData) {
       `;
   
     const channelId = process.env.DISCORD_CHANNEL_ID_SUPPORT || "";
-    const result = await sendToDiscord(channelId, messageContent);
+    await sendToDiscord(channelId, messageContent);
   
     const message = `
 Thank you for submitting the Support Form.

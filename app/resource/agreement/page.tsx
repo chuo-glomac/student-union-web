@@ -3,7 +3,6 @@ import { getUrl } from "@/utils/getUrl";
 import { useRouter } from "next/navigation";
 
 export default function AgreementPage() {
-  const router = useRouter();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-white text-black">

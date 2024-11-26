@@ -1,8 +1,4 @@
-import { getUrl } from "@/utils/getUrl";
 import { PrismaClient, Prisma } from "@prisma/client";
-import { ErrorBoundaryHandler } from "next/dist/client/components/error-boundary";
-import { sendEmail } from "@/utils/sendEmail";
-import sendToDiscord from "@/utils/sendToDiscord";
 const prisma = new PrismaClient();
 
 export async function GET() {
@@ -62,27 +58,6 @@ export async function POST(req: Request) {
     const memberResult = await prisma.members.create({
       data: memberNewData,
     });
-
-//     const messageContent = `
-//   **【ユーザー登録】** 
-//   新たなユーザーが登録されました。
-//   \`\`\`
-//   Member Id：${userAccess.member_id.toString().padStart(6, "0") || "unknown"}
-//   Name：${formData.get("familyName") as string} ${
-//       (formData.get("middleName") as string)
-//         ? `${formData.get("middleName") as string} `
-//         : ""
-//     }${formData.get("givenName") as string}
-//   ナマエ：${formData.get("familyName-pho") as string} ${
-//       (formData.get("middleName-pho") as string)
-//         ? `${formData.get("middleName-pho") as string} `
-//         : ""
-//     }${formData.get("givenName-pho") as string}
-//   \`\`\`
-//           `;
-
-    // const channelId = process.env.DISCORD_CHANNEL_ID_SIGNUP || "";
-    // await sendToDiscord(channelId, messageContent);
 
     console.log(memberResult);
     return Response.json({ ok: true, message: "Member info registered." });

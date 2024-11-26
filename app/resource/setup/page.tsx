@@ -1,5 +1,4 @@
 "use client";
-import { getUrl } from "@/utils/getUrl";
 import { useRouter } from "next/navigation";
 
 export default function AgreementPage() {

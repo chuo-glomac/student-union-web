@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { getUrl } from "@/utils/getUrl";
 import { PrismaClient } from "@prisma/client";
-import { ErrorBoundaryHandler } from "next/dist/client/components/error-boundary";
 import { sendEmail } from "@/utils/sendEmail";
 const prisma = new PrismaClient();
 

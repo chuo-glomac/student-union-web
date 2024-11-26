@@ -1,15 +1,13 @@
 "use client";
 import { useState } from "react";
-import { Field, FieldForPrivateEmail } from "@/components/form";
+import { Field } from "@/components/form";
 import { useRouter } from "next/navigation";
 import { getUrl } from "@/utils/getUrl";
 import { SubmitButton } from "@/components/submitButton";
 
-import { supabase } from "@/utils/supabase";
-import { useSearchParams, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(2);
   const [japan, setJapan] = useState<boolean>(true);
@@ -81,7 +79,7 @@ export default function SignUpPage() {
         電話番号: ${formData.get("phone")}
         `;
       } else {
-        const formList = `
+        formList = `
         !please confirm to send form!
 
         Name (Alphabet): ${formData.get("familyName")} ${formData.get(
@@ -213,6 +211,7 @@ export default function SignUpPage() {
           setCodeError("Code does not match.");
         }
       }
+
       let alert_complete = "";
       if (japan) {
         alert_complete = `
@@ -227,6 +226,8 @@ export default function SignUpPage() {
           Invite link for Discord is sent to your Private Email.
         `;
       }
+      alert(alert_complete);
+      
     } catch (err) {
       alert(err);
       setIsLoading(false);
