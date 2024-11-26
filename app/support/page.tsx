@@ -1,8 +1,8 @@
 "use client";
 import { Field } from "@/components/form";
 import { SubmitButton } from "@/components/submitButton";
-import { supportForm } from "@/utils/function_server";
-import { validateUser } from "@/utils/supabase/auth";
+import { supportForm } from "./actions";
+// import { validateUser } from "@/utils/supabase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -25,8 +25,8 @@ export default function SupportPage() {
   const getUserData = async () => {
     setIsLoading(true);
 
-    const { userData } = await validateUser();
-    setUser(userData);
+    // const { userData } = await validateUser();
+    // setUser(userData);
     // console.log(userData);
     // console.log(memberData);
 

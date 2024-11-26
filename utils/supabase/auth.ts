@@ -8,18 +8,6 @@
 // import { PrismaClient } from "@prisma/client";
 // const prisma = new PrismaClient();
 
-// // export async function signup(email: string, password: string) {
-// //   const { error } = await supabase.auth.signUp({ email, password })
-
-// //   if (error) {
-// //     console.log(error)
-// //     throw new Error('エラーが発生しました')
-// //   }
-
-// //   revalidatePath('/', 'layout')
-// //   redirect('/private')
-// // }
-
 // export async function login(email: string, password: string, path?: string) {
 //   const data = {
 //     email,
