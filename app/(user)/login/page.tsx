@@ -6,9 +6,11 @@ import { SubmitButton } from "@/components/submitButton";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 const supabase = createClient();
 
-export default function SignUpPage() {
+export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params_redirectTo = searchParams?.get("redirectTo") || "home";
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -16,8 +18,10 @@ export default function SignUpPage() {
     try {
       setIsLoading(true);
       setError("");
+
       const email = formData.get("email") as string;
       const password = formData.get("password") as string;
+
       if (!email || !password) {
         setError("メールアドレスとパスワードを入力してください")
         return;
@@ -35,7 +39,6 @@ export default function SignUpPage() {
       }
 
       console.log(data);
-      const params_redirectTo = searchParams.get("redirectTo") || "home";
       //   console.log(data);
       router.push(`${decodeURIComponent(params_redirectTo)}`);
     } catch (err) {
