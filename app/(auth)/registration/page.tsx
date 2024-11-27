@@ -11,7 +11,6 @@ export default function SignUpPage() {
   const [page, setPage] = useState<number>(1);
   const [email, setEmail] = useState<string>("");
   const [isCheckedAgreement, setIsCheckedAgreement] = useState<boolean>(false);
-  const [isCheckedLetter, setIsCheckedLetter] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const signUp = async (formData: FormData) => {
@@ -83,18 +82,6 @@ export default function SignUpPage() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center">
                   <input
-                    id="letter"
-                    type="checkbox"
-                    checked={isCheckedLetter}
-                    onChange={() => setIsCheckedLetter(prevStatus => !prevStatus)}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2"
-                  />
-                  <label htmlFor="newsLetter" className="ms-2 text-sm">
-                    Student Unionからの通知を受け取る。
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
                     id="agreement"
                     type="checkbox"
                     checked={isCheckedAgreement}
@@ -121,7 +108,7 @@ export default function SignUpPage() {
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 handleSubmit={signUp}
-                isValid={isCheckedAgreement && isCheckedLetter}
+                isValid={isCheckedAgreement}
               />
             </div>
           </form>

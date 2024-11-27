@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       studentNo,
       studentEmail,
     } = await req.json();
-    console.log(email, temporaryId, studentNo, studentEmail);
+    // console.log(email, temporaryId, studentNo, studentEmail);
 
     const userAccess = await prisma.userAccess.findUnique({
       where: {

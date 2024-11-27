@@ -25,7 +25,14 @@ export const confirmUser = async () => {
     // return;
   }
 
-  const { role } = userAccess;
+  const { role, status } = userAccess;
+  if (status === 'VALIDATING') {
+    if (userAccess.email_confirmed_at) {
+
+    } else if (userAccess.student_confirmed_at) {
+      redirect(`/registration/memberInfo/${userAccess.temporary_id}/${email}`)
+    }
+  }
 
   if (role !== "MODERATOR" && role !== "ADMIN") {
     redirect("/home");

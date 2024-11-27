@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,6 +6,124 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model UserAccess {
+  user_id              String     @id
+  status               UserStatus @default(VALIDATING)
+  role                 UserRole   @default(USER)
+  email                String     @unique
+
+  email_confirmed_at   DateTime?
+  student_confirmed_at DateTime?
+  member_created_at    DateTime?
+  
+  member_id            Int        @unique @default(autoincrement())
+  temporary_id         String     @default("0000000000")
+  member               Members?
+}
+
+model Members {
+  member_id       Int        @id
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @default(now())
+  familyName      String
+  givenName       String
+  middleName      String?
+  familyNamePho   String
+  givenNamePho    String
+  middleNamePho   String?
+  familyNameKanji String?
+  givenNameKanji  String?
+  middleNameKanji String?
+  birthOfDate     DateTime
+  nationality     String
+  phoneNumber     String?
+  newsLetter      Boolean    @default(false)
+  emails_recieved Emails[]   @relation("emailsReceived")
+  emails_sent     Emails[]   @relation("emailsSent")
+  user_access     UserAccess @relation(fields: [member_id], references: [member_id])
+  profile         Profiles?
+  student         Students?
+  supports        Supports[]
+}
+
+model Universities {
+  university_id String        @id
+  name_en       String
+  name_jp       String
+  departments   Departments[]
+  students      Students[]
+}
+
+model Departments {
+  department_id      Int          @id @default(autoincrement())
+  university_id      String
+  department_name_en String
+  department_name_jp String?
+  faculty_name_en    String
+  faculty_name_jp    String?
+  major_name_en      String?
+  major_name_jp      String?
+  university         Universities @relation(fields: [university_id], references: [university_id])
+  students           Students[]
+}
+
+model Students {
+  student_id    Int          @id @default(autoincrement())
+  created_at    DateTime     @default(now())
+  student_no    String       @unique
+  student_email String       @unique
+  date_of_entry DateTime     @default(now())
+  code          String       @default("000000")
+  trial_count   Int          @default(0)
+  validated     Boolean      @default(false)
+  member_id     Int          @unique
+  force         Boolean      @default(false)
+  trial_send    Int          @default(0)
+  university_id String
+  department_id Int
+  discordCode   String?
+  department    Departments  @relation(fields: [department_id], references: [department_id])
+  member        Members      @relation(fields: [member_id], references: [member_id])
+  university    Universities @relation(fields: [university_id], references: [university_id])
+}
+
+model Profiles {
+  created_at   DateTime  @default(now())
+  updated_at   DateTime?
+  username     String    @unique
+  display_name String?
+  description  String?
+  social_media Json
+  avatar_url   String    @default("default/default_male01.jpg")
+  member_id    Int       @id
+  member       Members   @relation(fields: [member_id], references: [member_id])
+}
+
+model Supports {
+  support_id   Int       @id @default(autoincrement())
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime?
+  sender_email String
+  subject      String
+  content      String
+  sender_id    Int?
+  member       Members?  @relation(fields: [sender_id], references: [member_id])
+}
+
+model Emails {
+  email_id        Int       @id @default(autoincrement())
+  original_id     Int?
+  created_at      DateTime  @default(now())
+  deleted_at      DateTime?
+  reciever_email  String
+  subject         String
+  content         String
+  sender_id       Int
+  receiver_id     Int?
+  receiver_member Members?  @relation("emailsReceived", fields: [receiver_id], references: [member_id])
+  sender_member   Members   @relation("emailsSent", fields: [sender_id], references: [member_id])
 }
 
 enum UserStatus {
@@ -26,141 +138,4 @@ enum UserRole {
   MODERATOR
   ADMIN
   GUEST
-}
-
-model UserAccess {
-  user_id   String @id
-  member_id Int    @unique @default(autoincrement())
-
-  temporary_id         String    @default("0000000000")
-  email                String    @unique
-  email_confirmed_at   DateTime?
-  student_confirmed_at DateTime?
-
-  status UserStatus @default(VALIDATING)
-  role   UserRole   @default(USER)
-
-  member Members?
-}
-
-model Members {
-  member_id   Int        @id
-  user_access UserAccess @relation(fields: [member_id], references: [member_id])
-
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-
-  familyName      String
-  givenName       String
-  middleName      String?
-  familyNamePho   String
-  givenNamePho    String
-  middleNamePho   String?
-  familyNameKanji String?
-  givenNameKanji  String?
-  middleNameKanji String?
-
-  birthOfDate DateTime
-  nationality String
-  phoneNumber String?
-
-  newsLetter Boolean @default(false)
-
-  student         Students?
-  profile         Profiles?
-  supports        Supports[]
-  emails_sent     Emails[]   @relation("emailsSent")
-  emails_recieved Emails[]   @relation("emailsReceived")
-}
-
-model Universities {
-  university_id String @id
-  name_en       String
-  name_jp       String
-
-  departments Departments[]
-  students    Students[]
-}
-
-model Departments {
-  department_id      Int          @id @default(autoincrement())
-  university_id      String
-  university         Universities @relation(fields: [university_id], references: [university_id])
-  faculty_name_en    String
-  faculty_name_jp    String?
-  department_name_en String
-  department_name_jp String?
-  major_name_en      String?
-  major_name_jp      String?
-
-  students Students[]
-}
-
-model Students {
-  student_id    Int          @id @default(autoincrement())
-  created_at    DateTime     @default(now())
-  university_id String
-  university    Universities @relation(fields: [university_id], references: [university_id])
-  department_id Int
-  department    Departments  @relation(fields: [department_id], references: [department_id])
-
-  student_no    String   @unique
-  student_email String   @unique
-  force         Boolean  @default(false)
-  date_of_entry DateTime @default(now())
-
-  code        String  @default("000000")
-  validated   Boolean @default(false)
-  trial_send  Int     @default(0)
-  trial_count Int     @default(0)
-
-  discordCode String?
-
-  member_id Int     @unique
-  member    Members @relation(fields: [member_id], references: [member_id])
-}
-
-model Profiles {
-  member_id Int     @id
-  member    Members @relation(fields: [member_id], references: [member_id])
-
-  created_at DateTime  @default(now())
-  updated_at DateTime?
-
-  username     String  @unique
-  display_name String?
-  description  String?
-  social_media Json
-  avatar_url   String  @default("default/default_male01.jpg")
-}
-
-model Supports {
-  support_id Int @id @default(autoincrement())
-
-  sender_id Int?
-  member    Members? @relation(fields: [sender_id], references: [member_id])
-
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
-
-  sender_email String
-  subject      String
-  content      String
-}
-
-model Emails {
-  email_id    Int       @id @default(autoincrement())
-  original_id Int?
-  created_at  DateTime  @default(now())
-  deleted_at  DateTime?
-
-  sender_id     Int
-  sender_member Members @relation("emailsSent", fields: [sender_id], references: [member_id])
-
-  receiver_id     Int?
-  receiver_member Members? @relation("emailsReceived", fields: [receiver_id], references: [member_id])
-
-  reciever_email String
-  subject        String
-  content        String
 }

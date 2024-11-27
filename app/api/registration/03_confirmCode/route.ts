@@ -11,9 +11,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-//   try {
+  try {
     const { email, temporaryId, code } = await req.json();
-    console.log(email, temporaryId, code)
+    console.log(email, temporaryId, code);
     // const log = await req.json();
     // console.log(log);
 
@@ -59,26 +59,28 @@ export async function POST(req: Request) {
       return Response.json({ ok: false, message: "Too match trial." });
     }
     if (student.code !== code) {
+      await prisma.students.update({
+        where: {
+          student_id: student.student_id,
+        },
+        data: {
+          trial_count: { increment: 1 },
+        },
+      });
       return Response.json({ ok: false, message: "Code doesn't match." });
     }
 
     const { inviteLink, code: inviteCode } = await createInvite();
 
     await prisma.students.update({
-        where: {
-            student_id: student.student_id,
-        },
-        data: {
-            validated: true,
-            discordCode: inviteCode,
-        }
-    })
-    // const result = await prisma.students.findUnique({
-    //     where: {
-    //         student_id: student.student_id,
-    //     }
-    // })
-    // console.log(result);
+      where: {
+        student_id: student.student_id,
+      },
+      data: {
+        validated: true,
+        discordCode: inviteCode,
+      },
+    });
 
     let subject = "";
     let message = "";
@@ -157,8 +159,12 @@ Copyright(C) All rights reserved.<br>
 新たなユーザーが登録されました。
 \`\`\`
 Member Id：${userAccess.member_id.toString().padStart(6, "0") || "unknown"}
-Name：${member.familyName} ${member.middleName ? `${member.middleName} ` : ""}${member.givenName}
-ナマエ：${member.familyNamePho} ${member.middleNamePho ? `${member.middleNamePho} ` : ""}${member.givenNamePho}
+Name：${member.familyName} ${member.middleName ? `${member.middleName} ` : ""}${
+      member.givenName
+    }
+ナマエ：${member.familyNamePho} ${
+      member.middleNamePho ? `${member.middleNamePho} ` : ""
+    }${member.givenNamePho}
 \`\`\`
           `;
 
@@ -166,8 +172,8 @@ Name：${member.familyName} ${member.middleName ? `${member.middleName} ` : ""}$
     await sendToDiscord(channelId, messageContent);
 
     return Response.json({ ok: true, message: "Discord invite send." });
-//   } catch (err) {
-//     console.log(err);
-//     return Response.json({ ok: false, message: `Unknown error` });
-//   }
+  } catch (err) {
+    console.log(typeof err);
+    return Response.json({ ok: false, message: `Unknown error: ${err}` });
+  }
 }

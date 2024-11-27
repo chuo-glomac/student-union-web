@@ -9,13 +9,12 @@ import { useParams } from "next/navigation";
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(2);
+  const [page, setPage] = useState<number>(1);
   const [japan, setJapan] = useState<boolean>(true);
   const [remember, setRemember] = useState(false);
   const [codeError, setCodeError] = useState("");
 
-  const [letter, setLetter] = useState(true);
-  const [agreement, setAgreement] = useState(false);
+  const [isCheckedLetter, setIsCheckedLetter] = useState(true);
 
   const params = useParams<{ params_id: string; params_email: string }>();
   const params_id = decodeURIComponent(params.params_id);
@@ -112,11 +111,11 @@ export default function SignUpPage() {
             formData: formObject,
           }),
         });
-        const data = await response.json()
+        const data = await response.json();
         console.log(data);
         if (data && data.ok === false) {
           alert(data.message);
-          return
+          return;
         }
 
         setPage(2);
@@ -156,7 +155,7 @@ export default function SignUpPage() {
           studentEmail,
         }),
       });
-      const data = await response.json()
+      const data = await response.json();
       console.log(data);
 
       if (data && data.ok === false) {
@@ -200,7 +199,7 @@ export default function SignUpPage() {
         }),
       });
       // console.log(response);
-      const data = await response.json()
+      const data = await response.json();
       console.log(data);
 
       if (data && data.ok === false) {
@@ -210,6 +209,7 @@ export default function SignUpPage() {
         } else {
           setCodeError("Code does not match.");
         }
+        return;
       }
 
       let alert_complete = "";
@@ -227,7 +227,6 @@ export default function SignUpPage() {
         `;
       }
       alert(alert_complete);
-
     } catch (err) {
       alert(err);
       setIsLoading(false);
@@ -607,40 +606,19 @@ export default function SignUpPage() {
                 required={japan}
               />
               <div className="flex items-center justify-center mt-4 mb-1">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center">
-                    <input
-                      id="newsLetter"
-                      type="checkbox"
-                      checked={letter}
-                      onChange={() => setLetter((prev) => !prev)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2"
-                    />
-                    <label htmlFor="newsLetter" className="ms-2 text-sm">
-                      I agree to recieve message from Student Union.
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="agree"
-                      type="checkbox"
-                      checked={agreement}
-                      onChange={() => setAgreement((prev) => !prev)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2"
-                    />
-                    <label htmlFor="agree" className="ms-2 text-sm">
-                      I agree to the{" "}
-                      <a
-                        target="_blank"
-                        href={`${getUrl()}/resource/agreement`}
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        terms and conditions
-                      </a>
-                      .
-                    </label>
-                  </div>
+                <div className="flex items-center">
+                  <input
+                    id="letter"
+                    type="checkbox"
+                    checked={isCheckedLetter}
+                    onChange={() =>
+                      setIsCheckedLetter((prevStatus) => !prevStatus)
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2"
+                  />
+                  <label htmlFor="newsLetter" className="ms-2 text-sm">
+                    Student Unionからの通知を受け取る。
+                  </label>
                 </div>
               </div>
               <div className="mt-4 flex flex-row gap-4">
@@ -649,7 +627,6 @@ export default function SignUpPage() {
                   isLoading={isLoading}
                   setIsLoading={setIsLoading}
                   handleSubmit={handleMemberInfo}
-                  isValid={agreement}
                 />
               </div>
             </div>
