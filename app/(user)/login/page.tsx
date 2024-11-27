@@ -1,12 +1,12 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { SubmitButton } from "@/components/submitButton";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 const supabase = createClient();
 
-export default function LoginPage() {
+function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params_redirectTo = searchParams?.get("redirectTo") || "home";
@@ -23,7 +23,7 @@ export default function LoginPage() {
       const password = formData.get("password") as string;
 
       if (!email || !password) {
-        setError("メールアドレスとパスワードを入力してください")
+        setError("メールアドレスとパスワードを入力してください");
         return;
       }
 
@@ -84,7 +84,7 @@ export default function LoginPage() {
             setIsLoading={setIsLoading}
             handleSubmit={handleSubmit}
           />
-        <p className="text-red-600 mt-2">{error}</p>
+          <p className="text-red-600 mt-2">{error}</p>
           <p className="ms-2 mt-4 text-sm text-right">
             Not yet registered?{" "}
             <span
@@ -97,5 +97,13 @@ export default function LoginPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export function LoginPageWrapper() {
+  return (
+    <Suspense>
+      <LoginPage />
+    </Suspense>
   );
 }
