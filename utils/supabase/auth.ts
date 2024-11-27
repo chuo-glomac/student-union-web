@@ -1,9 +1,9 @@
-// 'use server'
+'use server'
 // import { revalidatePath } from 'next/cache'
 // import { redirect } from 'next/navigation'
 
-// import { createClient } from '@/utils/supabase/server'
-// const supabase = createClient()
+import { createClient } from '@/utils/supabase/server'
+const supabase = createClient()
 
 // import { PrismaClient } from "@prisma/client";
 // const prisma = new PrismaClient();
@@ -22,7 +22,7 @@
 //     // redirect('/error')
 //   }
 
-//   await validateUser();
+// //   await validateUser();
 //   revalidatePath('/', 'layout')
 //   redirect(`/${path || "home"}`)
 // }
