@@ -1,9 +1,7 @@
-'use server'
+"use server";
 // import { revalidatePath } from 'next/cache'
-// import { redirect } from 'next/navigation'
-
-import { createClient } from '@/utils/supabase/server'
-const supabase = createClient()
+import { redirect } from 'next/navigation'
+import { createClient } from "@/utils/supabase/server";
 
 // import { PrismaClient } from "@prisma/client";
 // const prisma = new PrismaClient();
@@ -27,16 +25,17 @@ const supabase = createClient()
 //   redirect(`/${path || "home"}`)
 // }
 
-// export async function signout() {
-//   const { error } = await supabase.auth.signOut()
+export async function signout() {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
 
-//   if (error) {
-//     console.log(error);
-//     throw new Error('エラーが発生しました')
-//   }
+  if (error) {
+    console.log(error);
+    throw new Error("エラーが発生しました");
+  }
 
-//   await redirect("/login");
-// }
+  await redirect("/login");
+}
 
 // export async function validateUser() {
 //   const { data, error }: any = await supabase.auth.getUser();

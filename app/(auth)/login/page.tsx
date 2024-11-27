@@ -1,9 +1,10 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/submitButton";
 import { useRouter, useSearchParams } from "next/navigation";
+import { confirmUser } from "./action";
 const supabase = createClient();
 
 function LoginPage() {
@@ -13,6 +14,15 @@ function LoginPage() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    const initialLoad = async () => {
+      // await confirmUser();
+    }
+
+    initialLoad();
+    // console.log('initial load')
+  }, [])
 
   const handleSubmit = async (formData: FormData) => {
     try {
