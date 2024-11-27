@@ -100,7 +100,7 @@ function LoginPage() {
   );
 }
 
-export function LoginPageWrapper() {
+export default function LoginPageWrapper() {
   return (
     <Suspense>
       <LoginPage />
