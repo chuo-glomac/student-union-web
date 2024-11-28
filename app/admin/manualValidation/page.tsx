@@ -347,9 +347,10 @@ function BatchReservations() {
             onChange={handleFileChange}
           />
           <p id="file_input_help" className="mt-1 text-sm text-gray-500">
-            Required Fields: "Student ID | 学籍番号", "Chuo Email | 全学メール",
-            "Confirmation Code | 認証コード", "Validation Status | 認証状況",
-            "Private Email | 個人メール"
+            Required Fields: &quot;Student ID | 学籍番号&quot;, &quot;Chuo Email
+            | 全学メール&quot;, &quot;Confirmation Code | 認証コード&quot;,
+            &quot;Validation Status | 認証状況&quot;, &quot;Private Email |
+            個人メール&quot;
           </p>
         </div>
         {headerMapDialog && (
