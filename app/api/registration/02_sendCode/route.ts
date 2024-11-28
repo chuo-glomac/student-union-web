@@ -85,7 +85,7 @@ export async function POST(req: Request) {
           },
           data: {
             date_of_entry: new Date(),
-            trial_send: { increment: 1 },
+            send_count: { increment: 1 },
             code,
           },
         });

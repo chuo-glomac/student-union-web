@@ -80,7 +80,8 @@ model Students {
   validated     Boolean      @default(false)
   member_id     Int?         @unique
   force         Boolean      @default(false)
-  trial_send    Int          @default(0)
+  // trial_send    Int          @default(0)
+  send_count    Int          @default(0)
   university_id String
   department_id Int
   discordCode   String?
