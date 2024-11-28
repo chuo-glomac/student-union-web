@@ -9,18 +9,18 @@ datasource db {
 }
 
 model UserAccess {
-  user_id              String     @id
-  status               UserStatus @default(VALIDATING)
-  role                 UserRole   @default(USER)
-  email                String     @unique
+  user_id String     @id
+  status  UserStatus @default(VALIDATING)
+  role    UserRole   @default(USER)
+  email   String     @unique
 
   email_confirmed_at   DateTime?
   student_confirmed_at DateTime?
   member_created_at    DateTime?
-  
-  member_id            Int        @unique @default(autoincrement())
-  temporary_id         String     @default("0000000000")
-  member               Members?
+
+  member_id    Int      @unique @default(autoincrement())
+  temporary_id String   @default("0000000000")
+  member       Members?
 }
 
 model Members {
@@ -78,14 +78,14 @@ model Students {
   code          String       @default("000000")
   trial_count   Int          @default(0)
   validated     Boolean      @default(false)
-  member_id     Int          @unique
+  member_id     Int?         @unique
   force         Boolean      @default(false)
   trial_send    Int          @default(0)
   university_id String
   department_id Int
   discordCode   String?
   department    Departments  @relation(fields: [department_id], references: [department_id])
-  member        Members      @relation(fields: [member_id], references: [member_id])
+  member        Members?     @relation(fields: [member_id], references: [member_id])
   university    Universities @relation(fields: [university_id], references: [university_id])
 }
 
