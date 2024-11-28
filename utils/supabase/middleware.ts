@@ -41,7 +41,7 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const publicPaths = ['/login', '/auth', '/registration', '/api'];
+  const publicPaths = ['/login', '/auth', '/registration', '/api', '/service'];
   if (publicPaths.some((path) => pathname.startsWith(path))) {
     return supabaseResponse;
   }
