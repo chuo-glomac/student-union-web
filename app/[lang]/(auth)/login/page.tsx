@@ -14,19 +14,19 @@ function LoginPage({ params }: { params: { lang: string } }) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [lang, setLang] = useState<string>('');
+  const [lang, setLang] = useState<string>(params.lang || "en-US");
 
   useEffect(() => {
     const initialLoad = async () => {
       await confirmUser(lang, params_redirectTo);
-    }
-
-    const fetchLang = async () => {
-      const resolvedParams = await params; // Resolve the Promise
-      setLang(resolvedParams.lang); // Set the language from params
     };
 
-    fetchLang();
+    // const fetchLang = async () => {
+    //   const resolvedParams = await params;
+    //   setLang(resolvedParams.lang);
+    // };
+
+    // fetchLang();
     initialLoad();
   }, [params]);
 
@@ -114,7 +114,11 @@ function LoginPage({ params }: { params: { lang: string } }) {
   );
 }
 
-export default function LoginPageWrapper({ params }: { params: { lang: string } }) {
+export default function LoginPageWrapper({
+  params,
+}: {
+  params: { lang: string };
+}) {
   return (
     <Suspense>
       <LoginPage params={params} />
