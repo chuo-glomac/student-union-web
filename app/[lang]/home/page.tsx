@@ -2,7 +2,7 @@
 import { signout } from "@/utils/supabase/auth";
 import { useEffect, useState } from "react";
 
-export default function LangPage({ params }: { params: { lang: string } }) {
+export default function LangPage({ params }: { params: Promise<{ lang: string }> }) {
   const [lang, setLang] = useState<string>("");
 
   useEffect(() => {
