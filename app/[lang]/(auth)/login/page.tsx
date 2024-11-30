@@ -117,7 +117,7 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
 export default function LoginPageWrapper({
   params,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>
 }) {
   return (
     <Suspense>

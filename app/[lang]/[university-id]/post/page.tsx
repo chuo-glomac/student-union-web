@@ -19,7 +19,7 @@ const example_data: PostProps = {
   },
 };
 
-export default function Post({ params }: { params: { lang: string } }) {
+export default function Post({ params }: { params: Promise<{ lang: string }> }) {
   const [labels, setLabels] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
