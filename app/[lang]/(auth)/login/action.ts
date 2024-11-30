@@ -2,8 +2,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
 
 export const confirmUser = async (currentLang: string = 'en-US', redirectTo: string) => {
   console.log('Confirm User.')
@@ -15,18 +13,6 @@ export const confirmUser = async (currentLang: string = 'en-US', redirectTo: str
     // redirect("/login");
     return;
   }
-
-  const userAccess = await prisma.userAccess.findUnique({
-    where: {
-      user_id: data.user.id,
-    }
-  })
-  const student = await prisma.students.findUnique({
-    where: {
-      member_id: userAccess?.member_id
-    }
-  })
-  const universityId = student?.university_id
 
   redirect(redirectTo);
 };
