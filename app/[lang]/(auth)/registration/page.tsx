@@ -28,7 +28,6 @@ export default function SignUpPage() {
       email,
       password,
       options: {
-        emailRedirectTo: getUrl(),
         data: {
           temporary_id: generateRandomId(),
         },
