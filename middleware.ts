@@ -38,7 +38,8 @@ export async function middleware(request: NextRequest) {
   );
   if (!pathnameHasLocale) {
     const locale = getLocale(request);
-    request.nextUrl.pathname = `/${locale}${pathname}${search}`;
+    request.nextUrl.pathname = `/${locale}${pathname}`;
+    request.nextUrl.search = search
 
     return NextResponse.redirect(request.nextUrl);
   }
@@ -57,7 +58,7 @@ export const config = {
      * - API routes (/api/)
      * - Common static files (.png, .jpg, etc.)
      */
-    "/((?!_next).*)",
-    // '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // "/((?!_next).*)",
+    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

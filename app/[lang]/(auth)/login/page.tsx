@@ -18,7 +18,7 @@ function LoginPage({ params }: { params: { lang: string } }) {
 
   useEffect(() => {
     const initialLoad = async () => {
-      await confirmUser(lang);
+      await confirmUser(lang, params_redirectTo);
     }
 
     const fetchLabels = async (loadParams: any) => {
@@ -57,7 +57,7 @@ function LoginPage({ params }: { params: { lang: string } }) {
         return;
       }
 
-      await confirmUser(lang);
+      await confirmUser(lang, params_redirectTo);
     } catch (err) {
       alert(err);
     }
