@@ -7,26 +7,26 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { confirmUser } from "./action";
 const supabase = createClient();
 
-function LoginPage({ params }: { params: { lang: string } }) {
+function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params_redirectTo = searchParams?.get("redirectTo") || "home";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [lang, setLang] = useState<string>(params.lang || "en-US");
+  const [lang, setLang] = useState<string>('');
 
   useEffect(() => {
     const initialLoad = async () => {
       await confirmUser(lang, params_redirectTo);
     };
 
-    // const fetchLang = async () => {
-    //   const resolvedParams = await params;
-    //   setLang(resolvedParams.lang);
-    // };
+    const fetchLang = async () => {
+      const resolvedParams = await params;
+      setLang(resolvedParams.lang);
+    };
 
-    // fetchLang();
+    fetchLang();
     initialLoad();
   }, [params]);
 
