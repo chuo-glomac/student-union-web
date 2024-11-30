@@ -21,17 +21,14 @@ function LoginPage({ params }: { params: { lang: string } }) {
       await confirmUser(lang, params_redirectTo);
     }
 
-    const fetchLabels = async (loadParams: any) => {
-      const { lang } = await loadParams;
-      console.log(lang);
-
-      setLang(lang);
+    const fetchLang = async () => {
+      const resolvedParams = await params; // Resolve the Promise
+      setLang(resolvedParams.lang); // Set the language from params
     };
 
-    fetchLabels(params);
+    fetchLang();
     initialLoad();
-    // console.log('initial load')
-  }, [])
+  }, [params]);
 
   const handleSubmit = async (formData: FormData) => {
     try {
