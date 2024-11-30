@@ -91,15 +91,17 @@ model Students {
 }
 
 model Profiles {
-  created_at   DateTime  @default(now())
-  updated_at   DateTime?
-  username     String    @unique
-  display_name String?
-  description  String?
-  social_media Json
-  avatar_url   String    @default("default/default_male01.jpg")
-  member_id    Int       @id
-  member       Members   @relation(fields: [member_id], references: [member_id])
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+  username      String    @unique
+  display_name  String?
+  description   String?
+  social_media  Json
+  avatar_url    String    @default("default/default_male01.jpg")
+  member_id     Int       @id
+  member        Members   @relation(fields: [member_id], references: [member_id])
+  count_post    Int       @default(0)
+  count_friend Int       @default(0)
 }
 
 model Supports {

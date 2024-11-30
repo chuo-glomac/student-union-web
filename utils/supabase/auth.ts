@@ -1,10 +1,11 @@
 "use server";
-// import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from "@/utils/supabase/server";
 
-// import { PrismaClient } from "@prisma/client";
-// const prisma = new PrismaClient();
+import { createClient } from "@/utils/supabase/server";
+const supabase = await createClient();
+
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 // export async function login(email: string, password: string, path?: string) {
 //   const data = {
@@ -26,7 +27,6 @@ import { createClient } from "@/utils/supabase/server";
 // }
 
 export async function signout() {
-  const supabase = await createClient();
   const { error } = await supabase.auth.signOut();
 
   if (error) {
@@ -37,30 +37,20 @@ export async function signout() {
   await redirect("/login");
 }
 
-// export async function validateUser() {
-//   const { data, error }: any = await supabase.auth.getUser();
-//   if (error || !data?.user) redirect('/login');
-//   const userData: any = data.user;
+export async function validateUser() {
+  const { data, error }: any = await supabase.auth.getUser();
+  if (error || !data?.user) redirect('/login');
+  const userData: any = data.user;
 
-//   const memberData: any = await prisma.member.findUnique({
-//     where: { uuid: userData.id },
-//   });
-//   if (!memberData) redirect('/login');
-//   // console.log(userData);
-//   // console.log(memberData);
+  const userAccess: any = await prisma.userAccess.findUnique({
+    where: { user_id: userData.id },
+  });
+  if (!userAccess) redirect('/login');
+  
+  console.log('User Access:', userAccess)
 
-//   console.log('validate user:', memberData)
-// å
-//   delete userData.id;
-//   delete userData.identities;
-
-//   delete memberData.id;
-//   delete memberData.uuid;
-//   delete memberData.discordCode;
-//   delete memberData.status;
-
-//   return { userData, memberData, error }
-// }
+  return { ok: true, data: userAccess };
+}
 
 // export async function validateUserServer() {
 //   const { data, error }: any = await supabase.auth.getUser();

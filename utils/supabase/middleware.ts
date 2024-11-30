@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { defaultLocale, locales } from '@/utils/variable';
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -41,14 +42,18 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  // console.log(locales, defaultLocale);
+  const currentLang = locales.find((locale) => pathname.startsWith(`/${locale}`)) || defaultLocale;
+  const strippedPathname = pathname.replace(`/${currentLang}`, '') || '/';
+
   const publicPaths = ['/login', '/auth', '/registration', '/api', '/service'];
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
+  if (publicPaths.some((path) => strippedPathname.startsWith(path))) {
     return supabaseResponse;
   }
 
   if (!user) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
+    loginUrl.pathname = '/a/login';
     loginUrl.searchParams.set('redirectTo', `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }

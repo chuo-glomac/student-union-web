@@ -1,10 +1,39 @@
-export const getUrl = () => {
-    // let url = process.env.LOCAL_URL ?? 'http://glomac-student-union.vercel.app/'
+"use server";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-    // url = url.startsWith('http') ? url : `https://${url}`
-    // url = url.endsWith('/') ? url : `${url}/`
+export const getUrl = async () => {
+  // let url = process.env.LOCAL_URL ?? 'http://glomac-student-union.vercel.app/'
 
-    let url = 'https://web.student-union.pro'
+  // url = url.startsWith('http') ? url : `https://${url}`
+  // url = url.endsWith('/') ? url : `${url}/`
 
-    return url
-}
+  let url = "https://web.student-union.pro";
+
+  return url;
+};
+
+export const getUserPath = async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data?.user) {
+    return { ok: false, message: "No user detected.", url: '' };
+  }
+
+  const userAccess = await prisma.userAccess.findUnique({
+    where: {
+      user_id: data.user.id,
+    },
+  });
+  const student = await prisma.students.findUnique({
+    where: {
+      member_id: userAccess?.member_id,
+    },
+  });
+  const universityId = student?.university_id;
+
+  return { ok: true, url: `/${universityId}` };
+};

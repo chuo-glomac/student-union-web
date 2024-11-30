@@ -7,19 +7,28 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { confirmUser } from "./action";
 const supabase = createClient();
 
-function LoginPage() {
+function LoginPage({ params }: { params: { lang: string } }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params_redirectTo = searchParams?.get("redirectTo") || "home";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [lang, setLang] = useState<string>('');
 
   useEffect(() => {
     const initialLoad = async () => {
-      // await confirmUser();
+      await confirmUser(lang);
     }
 
+    const fetchLabels = async (loadParams: any) => {
+      const { lang } = await loadParams;
+      console.log(lang);
+
+      setLang(lang);
+    };
+
+    fetchLabels(params);
     initialLoad();
     // console.log('initial load')
   }, [])
@@ -48,9 +57,7 @@ function LoginPage() {
         return;
       }
 
-      console.log(data);
-      //   console.log(data);
-      router.push(`${decodeURIComponent(params_redirectTo)}`);
+      await confirmUser(lang);
     } catch (err) {
       alert(err);
     }
@@ -110,10 +117,10 @@ function LoginPage() {
   );
 }
 
-export default function LoginPageWrapper() {
+export default function LoginPageWrapper({ params }: { params: { lang: string } }) {
   return (
     <Suspense>
-      <LoginPage />
+      <LoginPage params={params} />
     </Suspense>
   );
 }
