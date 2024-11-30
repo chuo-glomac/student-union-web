@@ -1,7 +1,7 @@
 export default async function LangPage({
   params,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>
 }) {
   const { lang } = await params;
 
