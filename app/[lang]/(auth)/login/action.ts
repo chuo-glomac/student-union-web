@@ -18,12 +18,16 @@ export const confirmUser = async (
     return;
   }
 
-  console.log(redirectTo)
+  console.log(redirectTo);
   revalidatePath("/", "layout");
-  redirect(redirectTo);
+  redirect(`${currentLang}/${decodeURIComponent(redirectTo)}`);
 };
 
-export const login = async (formData: FormData, redirectTo: string) => {
+export const login = async (
+  formData: FormData,
+  currentLang: string = "en-US",
+  redirectTo: string = "/home"
+) => {
   const supabase = await createClient();
 
   // type-casting here for convenience

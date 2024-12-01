@@ -1,5 +1,5 @@
 "use client";
-import { getUserPath } from "@/utils/getUrl";
+// import { getUserPath } from "@/utils/getUrl";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Icon } from "./icons";
@@ -9,34 +9,25 @@ export const CustomHeader: React.FC<{ labels: any; currentPage: string }> = ({
   currentPage,
 }) => {
   const router = useRouter();
-  const [path, setPath] = useState<string>("");
+  // const [path, setPath] = useState<string>("");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await getUserPath(); // Replace with actual logic
-      if (!result) {
-        router.push("/login");
-      }
-      setPath(result.url);
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const result = await getUserPath();
+  //     if (!result) {
+  //       router.push("/login");
+  //     }
+  //     setPath(result.url);
+  //   };
 
-    fetchData();
-  }, [router]);
+  //   fetchData();
+  // }, [router]);
 
   return (
     <header className="bg-white shadow p-4">
       <nav className="container mx-auto flex justify-between items-center">
         <div className="text-2xl font-bold">Student Union</div>
         <ul className="flex space-x-4">
-          <li>
-            <a
-              href={`${path}/post`}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              {/* {labels.header.post} */}
-              <Icon name="home" solid={currentPage === "post"} />
-            </a>
-          </li>
           <li>
             <a
               href={`/home/message`}

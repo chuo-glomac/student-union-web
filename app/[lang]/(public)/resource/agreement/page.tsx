@@ -3,7 +3,6 @@ import { getUrl } from "@/utils/getUrl";
 import { useRouter } from "next/navigation";
 
 export default function AgreementPage() {
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-white text-black">
       <div className="group max-w-2xl w-full flex flex-col">
@@ -11,12 +10,11 @@ export default function AgreementPage() {
           className="text-2xl font-medium cursor-pointer mb-8"
           // onClick={() => router.push("/")}
         >
-          GLOMAC Student Union
+          Student Union
         </a>
         <h1 className="text-3xl font-bold mb-4">プライバシーポリシー</h1>
         <p>
-          GLOMAC Student Union 運営委員（以下、「運営委員」という。）は、GLOMAC
-          Student
+          Student Union 運営委員（以下、「運営委員」という。）は、Student
           Union（以下、「本サービス」という。）における、登録者（以下、「ユーザー」という。）の個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下、「本ポリシー」という。）を定めます。
         </p>
         <h2 className="text-2xl font-bold mt-4 mb-2">第1条（個人情報）</h2>
@@ -167,7 +165,7 @@ export default function AgreementPage() {
           本ポリシーに関するお問い合わせは、下記の窓口までお願いいたします。
         </p>
         <p>
-          <a href={`${getUrl()}support`} className="text-blue-500">
+          <a href={`${getUrl()}/support`} className="text-blue-500">
             ヘルプデスク フォーム
           </a>
         </p>

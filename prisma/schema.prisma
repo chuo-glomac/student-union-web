@@ -24,9 +24,9 @@ model UserAccess {
 }
 
 model Members {
-  member_id       Int        @id
-  created_at      DateTime   @default(now())
-  updated_at      DateTime   @default(now())
+  member_id       Int      @id
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
   familyName      String
   givenName       String
   middleName      String?
@@ -39,13 +39,19 @@ model Members {
   birthOfDate     DateTime
   nationality     String
   phoneNumber     String?
-  newsLetter      Boolean    @default(false)
-  emails_recieved Emails[]   @relation("emailsReceived")
-  emails_sent     Emails[]   @relation("emailsSent")
-  user_access     UserAccess @relation(fields: [member_id], references: [member_id])
-  profile         Profiles?
-  student         Students?
-  supports        Supports[]
+  newsLetter      Boolean  @default(false)
+
+  user_access UserAccess @relation(fields: [member_id], references: [member_id])
+  profile     Profiles?
+
+  emails_recieved Emails[] @relation("EmailsReceived")
+  emails_sent     Emails[] @relation("EmailsSent")
+
+  student  Students?
+  supports Supports[]
+
+  friendships_requester Friendships[] @relation("Requester")
+  friendships_addressee Friendships[] @relation("Addressee")
 }
 
 model Universities {
@@ -54,6 +60,7 @@ model Universities {
   name_jp       String
   departments   Departments[]
   students      Students[]
+  posts         Posts[]
 }
 
 model Departments {
@@ -80,7 +87,6 @@ model Students {
   validated     Boolean      @default(false)
   member_id     Int?         @unique
   force         Boolean      @default(false)
-  // trial_send    Int          @default(0)
   send_count    Int          @default(0)
   university_id String
   department_id Int
@@ -88,20 +94,6 @@ model Students {
   department    Departments  @relation(fields: [department_id], references: [department_id])
   member        Members?     @relation(fields: [member_id], references: [member_id])
   university    Universities @relation(fields: [university_id], references: [university_id])
-}
-
-model Profiles {
-  created_at    DateTime  @default(now())
-  updated_at    DateTime?
-  username      String    @unique
-  display_name  String?
-  description   String?
-  social_media  Json
-  avatar_url    String    @default("default/default_male01.jpg")
-  member_id     Int       @id
-  member        Members   @relation(fields: [member_id], references: [member_id])
-  count_post    Int       @default(0)
-  count_friend Int       @default(0)
 }
 
 model Supports {
@@ -125,8 +117,8 @@ model Emails {
   content         String
   sender_id       Int
   receiver_id     Int?
-  receiver_member Members?  @relation("emailsReceived", fields: [receiver_id], references: [member_id])
-  sender_member   Members   @relation("emailsSent", fields: [sender_id], references: [member_id])
+  receiver_member Members?  @relation("EmailsReceived", fields: [receiver_id], references: [member_id])
+  sender_member   Members   @relation("EmailsSent", fields: [sender_id], references: [member_id])
 }
 
 enum UserStatus {
@@ -141,4 +133,97 @@ enum UserRole {
   MODERATOR
   ADMIN
   GUEST
+}
+
+model Profiles {
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  username     String   @unique
+  display_name String?
+  description  String?
+  social_media Json
+  avatar_url   String   @default("default/default_male01.jpg")
+  member_id    Int      @id
+  member       Members  @relation(fields: [member_id], references: [member_id])
+  count_post   Int      @default(0)
+  count_friend Int      @default(0)
+
+  posts    Posts[]
+  comments Comments[]
+  likes    Likes[]
+}
+
+model Friendships {
+  friendship_id Int          @id @default(autoincrement())
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  requester_id  Int
+  addressee_id  Int
+  status        FriendStatus @default(PENDING)
+
+  requester Members @relation("Requester", fields: [requester_id], references: [member_id])
+  addressee Members @relation("Addressee", fields: [addressee_id], references: [member_id])
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELED
+}
+
+model Posts {
+  post_id        String     @id @default(uuid())
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  title          String
+  content        String
+  images         String[]
+  status         PostStatus @default(DRAFT)
+
+  profile   Profiles @relation(fields: [member_id], references: [member_id])
+  member_id Int
+
+  university    Universities @relation(fields: [university_id], references: [university_id])
+  university_id String
+
+  comments Comments[]
+  likes    Likes[]
+}
+
+enum PostStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  RESTRICTED
+  ARCHIVED
+  DELETED
+}
+
+model Comments {
+  comment_id String        @id @default(uuid())
+  content    String
+  createdAt  DateTime      @default(now())
+  status     CommentStatus @default(PENDING)
+
+  post    Posts  @relation(fields: [post_id], references: [post_id])
+  post_id String
+
+  profile   Profiles @relation(fields: [member_id], references: [member_id])
+  member_id Int
+}
+
+enum CommentStatus {
+  PENDING
+  PUBLISHED
+  RESTRICTED
+  DELETED
+}
+
+model Likes {
+  like_id   String   @id @default(uuid())
+  post      Posts    @relation(fields: [post_id], references: [post_id])
+  post_id   String
+  profile   Profiles @relation(fields: [member_id], references: [member_id])
+  member_id Int
 }

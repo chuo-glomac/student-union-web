@@ -20,7 +20,7 @@ const example_data: PostProps = {
 };
 
 export default function Post({ params }: { params: Promise<{ lang: string }> }) {
-  const [labels, setLabels] = useState<Record<string, string> | null>(null);
+  const [labels, setLabels] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchLabels = async (loadParams: any) => {

@@ -1,17 +1,43 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Field, FieldForPrivateEmail } from "@/components/form";
 import { getUrl } from "@/utils/getUrl";
 import { SubmitButton } from "@/components/submitButton";
 import { generateRandomId } from "@/utils/generateRandomId";
 
 import { supabase } from "@/utils/supabase";
+import { checkUserExist } from "./action";
+import { getLabels } from "@/utils/labels";
+import { LanguageSwitcher } from "@/components/changeLanguageButton";
+import { useRouter } from "next/navigation";
+import { LoadingScreen } from "@/components/loading";
 
-export default function SignUpPage() {
+export default function SignUpPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const router = useRouter();
+
   const [page, setPage] = useState<number>(1);
   const [email, setEmail] = useState<string>("");
   const [isCheckedAgreement, setIsCheckedAgreement] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [lang, setLang] = useState<string>("");
+  const [labels, setLabels] = useState<any | null>(null);
+  useEffect(() => {
+    const fetchLabels = async (loadParams: any) => {
+      const { lang } = await loadParams;
+      setLang(lang);
+      // console.log(lang);
+
+      const localizedLabels = getLabels(lang);
+      setLabels(localizedLabels);
+    };
+
+    fetchLabels(params);
+  }, [params]);
 
   const signUp = async (formData: FormData) => {
     const email = formData.get("email") as string;
@@ -23,8 +49,15 @@ export default function SignUpPage() {
       return;
     }
 
+    const { ok } = await checkUserExist(email);
+    if (!ok) {
+      alert(labels?.registration.user_exist as String);
+      window.location.reload();
+      return;
+    }
+
     // console.log(email, password, getUrl());
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -33,6 +66,7 @@ export default function SignUpPage() {
         },
       },
     });
+    console.log(data);
     if (error) {
       alert(error);
       return;
@@ -42,12 +76,19 @@ export default function SignUpPage() {
     setPage(2);
   };
 
+  if (!labels) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-white text-black">
       <div className="group max-w-2xl w-full flex flex-col">
-        <p className="text-2xl font-medium mb-10">
-          Student Union (Page: {page})
-        </p>
+        <div className="flex justify-between mb-10">
+          <p className="text-2xl font-medium">
+            Student Union {labels.registration.title}
+          </p>
+          <LanguageSwitcher />
+        </div>
 
         {page === 1 && (
           <form>
@@ -55,26 +96,26 @@ export default function SignUpPage() {
               type="email"
               pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
               name="email"
-              label="Private Email | 個人メールアドレス"
+              label={labels.registration.private_email_label}
               placeholder="sample@gmail.com"
-              description="！DO NOT USE iCloud　iCloudは使用できません！<br />This email will be used after graduations. (Chuo Email is not allowed)<br />このメールアドレスは卒業後の連絡にも使用されます。(全学メールは使用できません）"
+              description={labels.registration.private_email_desc}
               required={true}
             />
             <Field
               type="password"
               pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}"
               name="password"
-              label="Password | パスワード"
+              label={labels.registration.password_label}
               placeholder="********"
-              description="This is used to login to apps with Private Email.<br />Must contain letter, number, and be at least 8 characters.<br />個人メールアドレスと主にログイン時に必要です。<br />必ず英大文字、英小文字、数字を含んでください。"
+              description={labels.registration.password_desc}
               required={true}
             />
             <Field
               type="password"
               name="password-confirm"
-              label="Confirm Password | パスワード確認"
+              label={labels.registration.password_confirm_label}
               placeholder="********"
-              description="Please confirm your password.<br />確認のためパスワードを再度入力してください。"
+              description={labels.registration.password_confirm_desc}
               required={true}
             />
             <div className="flex items-center justify-center mt-4 mb-1">
@@ -84,24 +125,27 @@ export default function SignUpPage() {
                     id="agreement"
                     type="checkbox"
                     checked={isCheckedAgreement}
-                    onChange={() => setIsCheckedAgreement(prevStatus => !prevStatus)}
+                    onChange={() =>
+                      setIsCheckedAgreement((prevStatus) => !prevStatus)
+                    }
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2"
                   />
                   <label htmlFor="agree" className="ms-2 text-sm">
+                    {labels.registration.agreement_label_prefix}
                     <a
                       target="_blank"
-                      href={`${getUrl()}resource/agreement`}
+                      href={`${getUrl()}/resource/agreement`}
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
                     >
-                      利用規約
+                      {labels.registration.agreement_label}
                     </a>
-                    に同意する。
+                    {labels.registration.agreement_label_suffix}
                   </label>
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex flex-row gap-4">
+            <div className="mt-4 flex flex-col">
               <SubmitButton
                 label="Sign Up"
                 isLoading={isLoading}
@@ -109,21 +153,32 @@ export default function SignUpPage() {
                 handleSubmit={signUp}
                 isValid={isCheckedAgreement}
               />
+              <p className="ms-2 mt-4 text-sm text-right">
+                {labels.registration.login_label}{" "}
+                <span
+                  onClick={() => router.push(`/${lang}/login`)}
+                  className="text-blue-600 hover:underline"
+                >
+                  {labels.registration.login_page}
+                </span>
+              </p>
             </div>
           </form>
         )}
 
         {page === 2 && (
           <>
-            <h1 className="font-sans text-xl">メール送信完了</h1>
+            <h1 className="font-sans text-xl">
+              {labels.registration.confirm_title}
+            </h1>
             <p className="my-4">
-              以下のメールアドレスにメールを送信しました。<br />
-              <span className="font-semibold">{email}</span><br />
-              受信メールから引き続き登録をお願いいたします。
+              {labels.registration.confirm_text_1}
+              <br />
+              <span className="font-semibold">{email}</span>
+              <br />
+              {labels.registration.confirm_text_2}
             </p>
-            <p>
-              ※メールが届かない場合は、迷惑メールの設定によりブロックされている場合がございます。お手数ですが、@student-union.proを受信許可にご設定の上、再度最初からお手続きください。
-            </p>
+            <p>{labels.registration.confirm_text_3}</p>
           </>
         )}
       </div>

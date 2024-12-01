@@ -5,6 +5,9 @@ import { Suspense, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/submitButton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { confirmUser, login } from "./action";
+import { LanguageSwitcher } from "@/components/changeLanguageButton";
+import { getLabels } from "@/utils/labels";
+import { LoadingScreen } from "@/components/loading";
 const supabase = createClient();
 
 function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
@@ -14,20 +17,34 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  // useEffect(() => {
+  //   const initialLoad = async () => {
+  //     return confirmUser(lang, params_redirectTo);
+  //   };
+
+  //   const fetchLang = async () => {
+  //     const resolvedParams = await params;
+  //     setLang(resolvedParams.lang);
+  //   };
+
+  //   fetchLang();
+  //   initialLoad();
+  // }, [params]);
+
   const [lang, setLang] = useState<string>("");
-
+  const [labels, setLabels] = useState<any | null>(null);
   useEffect(() => {
-    const initialLoad = async () => {
-      return confirmUser(lang, params_redirectTo);
+    const fetchLabels = async (loadParams: any) => {
+      const { lang } = await loadParams;
+      setLang(lang);
+      // console.log(lang);
+
+      const localizedLabels = getLabels(lang);
+      setLabels(localizedLabels);
     };
 
-    const fetchLang = async () => {
-      const resolvedParams = await params;
-      setLang(resolvedParams.lang);
-    };
-
-    fetchLang();
-    initialLoad();
+    fetchLabels(params);
   }, [params]);
 
   const handleLogin = async (formData: FormData) => {
@@ -62,17 +79,25 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
   // const handleLogin = async (formData: FormData) => {
   //   return login
   // }
+  if (!labels) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-white text-black">
       <form className="max-w-lg w-full">
-        <a className="text-2xl font-medium">Login Page</a>
+        <div className="flex justify-between mb-10">
+          <p className="text-2xl font-medium">
+            Student Union {labels.login.title}
+          </p>
+          <LanguageSwitcher />
+        </div>
 
         <label
           className="block text-sm font-medium leading-6 text-gray-900 mt-6"
           htmlFor="email"
         >
-          メールアドレス
+          {labels.login.email_label}
         </label>
         <input
           className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -85,7 +110,7 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
           className="block text-sm font-medium leading-6 text-gray-900 mt-6"
           htmlFor="password"
         >
-          パスワード
+          {labels.login.password_label}
         </label>
         <input
           className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -103,12 +128,12 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
           />
           <p className="text-red-600 mt-2">{error}</p>
           <p className="ms-2 mt-4 text-sm text-right">
-            Not yet registered?{" "}
+            {labels.login.registration_label}{" "}
             <span
-              onClick={() => router.push("/registration")}
+              onClick={() => router.push(`/${lang}/registration`)}
               className="text-blue-600 hover:underline"
             >
-              Registration Page
+              {labels.login.registration_page}
             </span>
           </p>
         </div>
