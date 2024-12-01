@@ -4,21 +4,21 @@ import { createClient } from "@/utils/supabase/client";
 import { Suspense, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/submitButton";
 import { useRouter, useSearchParams } from "next/navigation";
-import { confirmUser } from "./action";
+import { confirmUser, login } from "./action";
 const supabase = createClient();
 
 function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const params_redirectTo = searchParams?.get("redirectTo") || "home";
+  const params_redirectTo = searchParams?.get("redirectTo") || "/home";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [lang, setLang] = useState<string>('');
+  const [lang, setLang] = useState<string>("");
 
   useEffect(() => {
     const initialLoad = async () => {
-      await confirmUser(lang, params_redirectTo);
+      return confirmUser(lang, params_redirectTo);
     };
 
     const fetchLang = async () => {
@@ -30,7 +30,7 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
     initialLoad();
   }, [params]);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleLogin = async (formData: FormData) => {
     try {
       setIsLoading(true);
       setError("");
@@ -43,7 +43,6 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
         return;
       }
 
-      //   await login(email, password);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -54,11 +53,15 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
         return;
       }
 
-      await confirmUser(lang, params_redirectTo);
+      return confirmUser(lang, params_redirectTo);
     } catch (err) {
       alert(err);
     }
   };
+
+  // const handleLogin = async (formData: FormData) => {
+  //   return login
+  // }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-white text-black">
@@ -96,7 +99,7 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
             label="Log In"
             isLoading={isLoading}
             setIsLoading={setIsLoading}
-            handleSubmit={handleSubmit}
+            handleSubmit={handleLogin}
           />
           <p className="text-red-600 mt-2">{error}</p>
           <p className="ms-2 mt-4 text-sm text-right">
@@ -117,7 +120,7 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
 export default function LoginPageWrapper({
   params,
 }: {
-  params: Promise<{ lang: string }>
+  params: Promise<{ lang: string }>;
 }) {
   return (
     <Suspense>
