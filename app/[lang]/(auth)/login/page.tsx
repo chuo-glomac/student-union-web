@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitButton } from "@/components/submitButton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { confirmUser, login } from "./action";
@@ -10,27 +10,13 @@ import { getLabels } from "@/utils/labels";
 import { LoadingScreen } from "@/components/loading";
 const supabase = createClient();
 
-function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
+export default function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params_redirectTo = searchParams?.get("redirectTo") || "/home";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-
-  // useEffect(() => {
-  //   const initialLoad = async () => {
-  //     return confirmUser(lang, params_redirectTo);
-  //   };
-
-  //   const fetchLang = async () => {
-  //     const resolvedParams = await params;
-  //     setLang(resolvedParams.lang);
-  //   };
-
-  //   fetchLang();
-  //   initialLoad();
-  // }, [params]);
 
   const [lang, setLang] = useState<string>("");
   const [labels, setLabels] = useState<any | null>(null);
@@ -47,38 +33,36 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
     fetchLabels(params);
   }, [params]);
 
-  const handleLogin = async (formData: FormData) => {
-    try {
-      setIsLoading(true);
-      setError("");
-
-      const email = formData.get("email") as string;
-      const password = formData.get("password") as string;
-
-      if (!email || !password) {
-        setError("メールアドレスとパスワードを入力してください");
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
-      if (error) {
-        console.log("Login error:", error);
-        setError("メールアドレスまたはパスワードが間違っています");
-        return;
-      }
-
-      return confirmUser(lang, params_redirectTo);
-    } catch (err) {
-      alert(err);
-    }
-  };
-
   // const handleLogin = async (formData: FormData) => {
-  //   return login
-  // }
+  //   try {
+  //     setIsLoading(true);
+  //     setError("");
+
+  //     const email = formData.get("email") as string;
+  //     const password = formData.get("password") as string;
+
+  //     if (!email || !password) {
+  //       setError("メールアドレスとパスワードを入力してください");
+  //       return;
+  //     }
+
+  //     const { data, error } = await supabase.auth.signInWithPassword({
+  //       email: email,
+  //       password: password,
+  //     });
+  //     if (error) {
+  //       console.log("Login error:", error);
+  //       setError("メールアドレスまたはパスワードが間違っています");
+  //       return;
+  //     }
+
+  //     console.log(data);
+  //     return confirmUser(lang, params_redirectTo);
+  //   } catch (err) {
+  //     alert(err);
+  //   }
+  // };
+
   if (!labels) {
     return <LoadingScreen />;
   }
@@ -124,7 +108,7 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
             label="Log In"
             isLoading={isLoading}
             setIsLoading={setIsLoading}
-            handleSubmit={handleLogin}
+            handleSubmit={login}
           />
           <p className="text-red-600 mt-2">{error}</p>
           <p className="ms-2 mt-4 text-sm text-right">
@@ -142,14 +126,14 @@ function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
   );
 }
 
-export default function LoginPageWrapper({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
-  return (
-    <Suspense>
-      <LoginPage params={params} />
-    </Suspense>
-  );
-}
+// export default function LoginPageWrapper({
+//   params,
+// }: {
+//   params: Promise<{ lang: string }>;
+// }) {
+//   return (
+//     <Suspense>
+//       <LoginPage params={params} />
+//     </Suspense>
+//   );
+// }

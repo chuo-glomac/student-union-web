@@ -18,16 +18,27 @@ export const SubmitButton = ({
 }: SubmitButtonProps) => {
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    if (!isValid) return;
+
     setIsLoading(true);
     const form = e.currentTarget.form;
-    const formData = new FormData(form || undefined);
-    await handleSubmit(formData);
+    if (form) {
+      const formData = new FormData(form);
+      try {
+        await handleSubmit(formData);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    // const form = e.currentTarget.form;
+    // const formData = new FormData(form || undefined);
+    // await handleSubmit(formData);
     setIsLoading(false);
   };
 
   return (
     <button
-      type="submit"
+      type="button"
       onClick={handleClick}
       disabled={isLoading}
       className={`flex w-full justify-center items-center rounded-md  px-3 py-2 text-sm font-semibold leading-6 text-white shadow-sm ${

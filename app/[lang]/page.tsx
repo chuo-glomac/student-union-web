@@ -1,12 +1,12 @@
+"use server"
 import { LanguageSwitcher } from "@/components/changeLanguageButton";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default async function LangPage({
   params,
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const router = useRouter();
   const { lang } = await params;
 
   return (
@@ -14,7 +14,7 @@ export default async function LangPage({
       <h1>Welcome to the Top Page!</h1>
       <p>Language: {lang}</p>
       <LanguageSwitcher />
-      <a onClick={() => router.push(`/${lang}/login`)}>To Home</a>
+      <Link href={`/${lang}/home`}>To Home</Link>
     </div>
   );
 }

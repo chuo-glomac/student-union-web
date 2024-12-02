@@ -1,11 +1,11 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
-import { defaultLocale, locales } from '@/utils/variable';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import { defaultLocale, locales } from "@/utils/variable";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
-  })
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,20 +13,22 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          );
           supabaseResponse = NextResponse.next({
             request,
-          })
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
-          )
+          );
         },
       },
     }
-  )
+  );
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
@@ -34,27 +36,28 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   const { pathname, search } = request.nextUrl;
 
-  if (pathname === '/') {
+  // console.log(locales, defaultLocale);
+  const currentLang =
+    locales.find((locale) => pathname.startsWith(`/${locale}`)) ||
+    defaultLocale;
+  const strippedPathname = pathname.replace(`/${currentLang}`, "") || "/";
+
+  if (strippedPathname === '/') {
     return supabaseResponse;
   }
-
-  // console.log(locales, defaultLocale);
-  const currentLang = locales.find((locale) => pathname.startsWith(`/${locale}`)) || defaultLocale;
-  const strippedPathname = pathname.replace(`/${currentLang}`, '') || '/';
-
-  const publicPaths = ['/login', '/auth', '/registration', '/api', '/service'];
+  const publicPaths = ["/login", "/auth", "/registration", "/api", "/service"];
   if (publicPaths.some((path) => strippedPathname.startsWith(path))) {
     return supabaseResponse;
   }
 
   if (!user) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    loginUrl.searchParams.set('redirectTo', `${pathname}${search}`);
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("redirectTo", `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -85,5 +88,5 @@ export async function updateSession(request: NextRequest) {
   // If this is not done, you may be causing the browser and server to go out
   // of sync and terminate the user's session prematurely!
 
-  return supabaseResponse
+  return supabaseResponse;
 }

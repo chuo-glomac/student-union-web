@@ -19,19 +19,19 @@ export const confirmUser = async (
   }
 
   console.log(redirectTo);
-  revalidatePath("/", "layout");
-  redirect(`${currentLang}/${decodeURIComponent(redirectTo)}`);
+  console.log(decodeURIComponent(redirectTo));
+
+  // revalidatePath(`/${currentLang}/`, "layout");
+  redirect(decodeURIComponent(redirectTo));
 };
 
 export const login = async (
   formData: FormData,
-  currentLang: string = "en-US",
+  // currentLang: string = "en-US",
   redirectTo: string = "/home"
 ) => {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -43,6 +43,7 @@ export const login = async (
     redirect("/error");
   }
 
+  // console.log(decodeURIComponent(redirectTo));
   revalidatePath("/", "layout");
   redirect(decodeURIComponent(redirectTo));
 };
