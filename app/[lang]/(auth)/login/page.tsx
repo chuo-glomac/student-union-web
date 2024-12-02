@@ -28,6 +28,7 @@ export default function LoginPage({ params }: { params: Promise<{ lang: string }
 
       const localizedLabels = getLabels(lang);
       setLabels(localizedLabels);
+      await confirmUser(lang, params_redirectTo);
     };
 
     fetchLabels(params);

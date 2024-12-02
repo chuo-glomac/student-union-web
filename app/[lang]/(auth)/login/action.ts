@@ -14,28 +14,34 @@ export const confirmUser = async (
 
   if (error || !data?.user) {
     console.log(error);
-    // redirect("/login");
     return;
   }
 
   console.log(redirectTo);
   console.log(decodeURIComponent(redirectTo));
 
-  // revalidatePath(`/${currentLang}/`, "layout");
+  revalidatePath(`/`, "layout");
   redirect(decodeURIComponent(redirectTo));
 };
 
 export const login = async (
   formData: FormData,
-  // currentLang: string = "en-US",
   redirectTo: string = "/home"
 ) => {
   const supabase = await createClient();
+
+  const { data: userData } = await supabase.auth.getUser();
+
+  if (userData?.user) {
+    revalidatePath("/", "layout");
+    redirect(decodeURIComponent(redirectTo));
+  }
 
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
+  
 
   const { error } = await supabase.auth.signInWithPassword(data);
 
